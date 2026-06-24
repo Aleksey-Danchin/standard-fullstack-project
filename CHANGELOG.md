@@ -8,8 +8,9 @@
 
 ### Added
 
-- Scaffold zones: `SCAFFOLD.md`, `@scaffold-*` markers in core/config/integration files
-- Skills: `sync-scaffold-template`, `align-scaffold-standard` (scripts in `.cursor/skills/*/scripts/`)
+- Skill `prepare-scaffold-fork` — интерактивная подготовка продуктового fork
+- Scaffold zones: `SCAFFOLD.md`, `@scaffold-*` markers
+- Skills: `sync-scaffold-template`, `align-scaffold-standard`
 - Session module (backend + frontend), Redis, Traefik dev stack
 
 ## [0.1.0] - 2026-06-24

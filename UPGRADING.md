@@ -2,9 +2,11 @@
 
 Инструкции при обновлении каркаса в **репозитории продукта** (fork).
 
+Первичная настройка fork — skill **`prepare-scaffold-fork`**, не этот файл.
+
 Перед merge прочитайте раздел для целевой версии. После merge обновите `.template-version`.
 
-Автоматизация: skills `sync-scaffold-template`, `align-scaffold-standard` (скрипты внутри `.cursor/skills/*/scripts/`).
+Автоматизация sync: skill `sync-scaffold-template`.
 
 ## Общий порядок
 
@@ -28,9 +30,8 @@
 
 ## 0.1.0 (первая установка)
 
-Если проект создан из форка:
+Используйте skill **`prepare-scaffold-fork`** (интерактивно) или:
 
-1. Добавить remote: `git remote add template https://github.com/Aleksey-Danchin/standard-fullstack-project.git`
-2. Переименовать `xxyyzz` → имя проекта (отдельный коммит)
-3. `cp .env.template .env`
-4. `./scripts/dev-start.sh`, `./scripts/prisma-migrate.sh init`, `./scripts/prisma-seed.sh`
+```bash
+.cursor/skills/prepare-scaffold-fork/scripts/prepare-fork.sh --project-name my-app
+```

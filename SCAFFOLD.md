@@ -19,7 +19,11 @@
 | `@scaffold-config` | **B — конфиг** | Только имя проекта, домены, секреты, env. |
 | `@scaffold-integration` | **C — wiring** | Добавлять imports/модули; не переписывать ядро. |
 
-Skills Cursor: `sync-scaffold-template` (подтянуть template), `align-scaffold-standard` (привести проект к стандарту каркаса).
+Skills Cursor:
+
+- `prepare-scaffold-fork` — первичная настройка fork (интерактивно)
+- `sync-scaffold-template` — подтянуть template (на fork)
+- `align-scaffold-standard` — только в репозитории каркаса; на fork удаляется при prepare
 
 ## A — Core (`@scaffold-core`)
 

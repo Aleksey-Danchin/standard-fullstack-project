@@ -178,13 +178,12 @@ git checkout template/v0.2.0 -- \
 
 ## Первая настройка fork (один раз)
 
-Если пользователь только создал проект:
+Skill **`prepare-scaffold-fork`** — интерактивный опрос и автоматическая подготовка.
+
+Или скрипт:
 
 ```bash
-git clone git@github.com:YOU/my-app.git && cd my-app
-git remote add template https://github.com/Aleksey-Danchin/standard-fullstack-project.git
-# переименовать xxyyzz → my-app (отдельный коммит)
-# cp .env.template .env
+.cursor/skills/prepare-scaffold-fork/scripts/prepare-fork.sh --project-name my-app
 ```
 
 GitHub Fork: `origin` уже указывает на fork; добавить только `template`.

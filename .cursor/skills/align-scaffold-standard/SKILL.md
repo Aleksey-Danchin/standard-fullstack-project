@@ -1,29 +1,27 @@
 ---
 name: align-scaffold-standard
 description: >-
-  Aligns a repo with fullstack scaffold (каркас) standards: audits scaffold
-  zones, adds or fixes @scaffold-core/config/integration markers, updates
-  SCAFFOLD.md, moves misplaced product code out of scaffold paths. Use when
-  marking scaffold files, fixing scaffold compliance, preparing a fork for
-  template sync, or after adding new scaffold modules to the template repo.
+  Aligns the template repository with scaffold (каркас) standards: audits zones,
+  adds @scaffold-* markers, updates SCAFFOLD.md. For standard-fullstack-project
+  maintainers only — product forks should delete this skill (see README checklist).
+  Use when marking scaffold files or adding new scaffold modules to the template.
 disable-model-invocation: false
 ---
 
 # Align Scaffold Standard
 
-Приводит репозиторий к стандарту **каркаса** (scaffold): маркеры в файлах,
-актуальный `SCAFFOLD.md`, отделение продуктового кода от зон template.
+**Только для репозитория каркаса** (`standard-fullstack-project`). На продуктовом fork
+удалите `.cursor/skills/align-scaffold-standard/` (см. README, чеклист после клонирования).
 
-**Не путать с framework** (NestJS, React) — здесь «каркас» = стартовый шаблон monorepo.
+Приводит каркас к стандарту: маркеры в файлах, актуальный `SCAFFOLD.md`.
 
 ## Когда применять
 
 | Ситуация | Действие |
 |----------|----------|
-| Новый файл в зоне A/B/C (мейнтейнер template) | Баннер + строка в `SCAFFOLD.md` |
-| Fork: правили `session/` или `services/` | Вынести в product, восстановить из template или пометить осознанно |
-| Перед первым `template-sync` | Аудит + маркеры |
-| Пользователь просит «пометить каркасные файлы» | Полный проход |
+| Новый файл в зоне A/B/C | Баннер + строка в `SCAFFOLD.md` |
+| Рефакторинг зон каркаса | Аудит `scripts/scaffold-audit.sh` + правки |
+| Пользователь просит «пометить каркасные файлы» | Полный проход (только в repo каркаса) |
 
 ## Workflow
 
