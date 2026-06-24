@@ -11,6 +11,7 @@ PROJECT_NAME=""
 PRODUCTION_URL=""
 ADD_TEMPLATE_REMOTE=true
 SESSION_SECRET=""
+TEMPLATE_URL=""
 
 usage() {
   cat <<'EOF'
@@ -20,6 +21,7 @@ Options:
   --project-name <name>   Имя проекта (kebab-case, a-z0-9-)
   --production-url <url>  Production URL (опционально)
   --session-secret <str>  SESSION_TOKEN_SECRET (иначе генерируется)
+  --template-url <url>    URL git-репозитория каркаса (для remote template)
   --no-template-remote    Не добавлять git remote template
   --dry-run               Показать действия без изменений
   -h, --help
@@ -31,6 +33,7 @@ while [[ $# -gt 0 ]]; do
     --project-name) PROJECT_NAME="${2:?}"; shift 2 ;;
     --production-url) PRODUCTION_URL="${2:?}"; shift 2 ;;
     --session-secret) SESSION_SECRET="${2:?}"; shift 2 ;;
+    --template-url) TEMPLATE_URL="${2:?}"; shift 2 ;;
     --no-template-remote) ADD_TEMPLATE_REMOTE=false; shift ;;
     --dry-run) DRY_RUN=true; shift ;;
     -h|--help) usage; exit 0 ;;
@@ -75,7 +78,7 @@ run_rm_rf() {
   fi
 }
 
-echo "=== Prepare scaffold fork ==="
+echo "=== Prepare product from template ==="
 echo "Project: ${PROJECT_NAME}"
 echo "Dev domain: ${DEV_DOMAIN}"
 [[ -n "${PRODUCTION_URL}" ]] && echo "Production: ${PRODUCTION_URL}"
@@ -138,16 +141,26 @@ else
   echo "Created .env (SESSION_TOKEN_SECRET set)."
 fi
 
-# 4. Template remote for future sync
+# 4. Template remote (связь с каркасом; GitHub Use this template не добавляет её сам)
 if [[ "${ADD_TEMPLATE_REMOTE}" == true ]]; then
+  REMOTE_URL="${TEMPLATE_URL:-${TEMPLATE_REPO}}"
   if git remote get-url template >/dev/null 2>&1; then
     echo "Remote template already exists."
   elif [[ "${DRY_RUN}" == true ]]; then
-    echo "[dry-run] git remote add template ${TEMPLATE_REPO}"
+    echo "[dry-run] git remote add template ${REMOTE_URL}"
   else
-    git remote add template "${TEMPLATE_REPO}"
-    echo "Added git remote template."
+    git remote add template "${REMOTE_URL}"
+    echo "Added git remote template → ${REMOTE_URL}"
   fi
+fi
+
+# 5. One-time Cursor artifacts (this script removes itself)
+run_rm_rf ".cursor/skills/prepare-scaffold-fork"
+if [[ "${DRY_RUN}" == true ]]; then
+  echo "[dry-run] rm -f .cursor/commands/init-project.md"
+elif [[ -f ".cursor/commands/init-project.md" ]]; then
+  rm -f ".cursor/commands/init-project.md"
+  echo "Removed .cursor/commands/init-project.md"
 fi
 
 echo ""

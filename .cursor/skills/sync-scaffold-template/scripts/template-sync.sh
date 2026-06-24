@@ -13,7 +13,7 @@ usage() {
   cat <<'EOF'
 Usage: .cursor/skills/sync-scaffold-template/scripts/template-sync.sh [options]
 
-Подтягивает изменения каркаса в репозиторий продукта (fork).
+Подтягивает релиз каркаса в продуктовый repo (нужен `git remote template`).
 Создаёт ветку sync/template-<ref> и выполняет merge.
 
 Options:

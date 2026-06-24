@@ -1,12 +1,10 @@
 # Upgrading
 
-Инструкции при обновлении каркаса в **репозитории продукта** (fork).
+Инструкции при обновлении каркаса в **продуктовом репозитории** (созданном через **Use this template**).
 
-Первичная настройка fork — skill **`prepare-scaffold-fork`**, не этот файл.
+Первичная настройка — **`/init-project`** после clone (добавляет `git remote template`).
 
 Перед merge прочитайте раздел для целевой версии. После merge обновите `.template-version`.
-
-Автоматизация sync: skill `sync-scaffold-template`.
 
 ## Общий порядок
 
@@ -24,14 +22,12 @@
 
 При sync с `main` проверьте:
 
-- [ ] `UPGRADING.md` и `CHANGELOG.md` в продукте обновлены из template
+- [ ] `UPGRADING.md` и `CHANGELOG.md` обновлены из каркаса
 - [ ] `.env` — новые переменные из `.env.template`
 - [ ] Prisma migrate, если менялась схема
 
-## 0.1.0 (первая установка)
+## 0.1.0 (первый старт)
 
-Используйте skill **`prepare-scaffold-fork`** (интерактивно) или:
-
-```bash
-.cursor/skills/prepare-scaffold-fork/scripts/prepare-fork.sh --project-name my-app
-```
+1. GitHub: **Use this template** → новый repository
+2. `git clone` → Cursor: **`/init-project`**
+3. Дальше — разработка; обновления — `sync-scaffold-template`

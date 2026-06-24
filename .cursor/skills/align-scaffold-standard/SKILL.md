@@ -3,15 +3,14 @@ name: align-scaffold-standard
 description: >-
   Aligns the template repository with scaffold (каркас) standards: audits zones,
   adds @scaffold-* markers, updates SCAFFOLD.md. For standard-fullstack-project
-  maintainers only — product forks should delete this skill (see README checklist).
+  maintainers only — product repos delete this skill on /init-project.
   Use when marking scaffold files or adding new scaffold modules to the template.
 disable-model-invocation: false
 ---
 
 # Align Scaffold Standard
 
-**Только для репозитория каркаса** (`standard-fullstack-project`). На продуктовом fork
-удалите `.cursor/skills/align-scaffold-standard/` (см. README, чеклист после клонирования).
+**Только для репозитория каркаса.** В продукте из template удаляется при `/init-project`.
 
 Приводит каркас к стандарту: маркеры в файлах, актуальный `SCAFFOLD.md`.
 
@@ -28,7 +27,7 @@ disable-model-invocation: false
 ```
 Align progress:
 - [ ] Step 1: Run `scripts/scaffold-audit.sh`
-- [ ] Step 2: Classify repo (template vs product fork)
+- [ ] Step 2: Classify repo (scaffold vs product from template)
 - [ ] Step 3: Fix missing markers
 - [ ] Step 4: Fix misplaced product code in scaffold zones
 - [ ] Step 5: Update SCAFFOLD.md
@@ -46,7 +45,7 @@ Align progress:
 ### Step 2: Classify
 
 - **Репозиторий template** (standard-fullstack-project): все пути из `SCAFFOLD.md` должны быть помечены.
-- **Fork продукта**: маркеры как у template; drift в core — либо откат к template, либо вынос в `features/` / `modules/`.
+- **Продукт из template**: не использовать этот skill — маркеры уже в каркасе
 
 ### Step 3: Add or fix markers
 
@@ -75,7 +74,7 @@ grep -rl '@scaffold-core' apps/backend/src/session apps/frontend/src/services
 2. Перенести код, обновить imports
 3. В scaffold оставить только вызов/hook из feature
 
-Если fork сильно изменил core-файл:
+Если продукт сильно изменил core-файл:
 
 ```bash
 git fetch template

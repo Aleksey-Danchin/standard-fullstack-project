@@ -8,7 +8,7 @@
 
 ### Added
 
-- Skill `prepare-scaffold-fork` — интерактивная подготовка продуктового fork
+- Документация и skills: старт через **GitHub Template** + `/init-project`, sync через `template` remote
 - Scaffold zones: `SCAFFOLD.md`, `@scaffold-*` markers
 - Skills: `sync-scaffold-template`, `align-scaffold-standard`
 - Session module (backend + frontend), Redis, Traefik dev stack

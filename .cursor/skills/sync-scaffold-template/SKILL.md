@@ -1,18 +1,16 @@
 ---
 name: sync-scaffold-template
 description: >-
-  Syncs a forked product repo with the standard-fullstack-project template
-  (upstream). Sets up the template remote, creates sync branches, merges tagged
-  releases, resolves conflicts by scaffold (каркас) zones, runs post-sync checks.
-  Use when updating the scaffold, pulling template changes, syncing каркас,
-  merge template release, or running template-sync.
+  Syncs a product repo (created via GitHub Use this template) with the scaffold
+  source. Requires git remote template. Creates sync branches, merges tagged
+  releases, resolves scaffold zone conflicts. Use when updating scaffold,
+  pulling template release, syncing каркас, or template-sync.
 disable-model-invocation: false
 ---
 
 # Sync Scaffold Template
 
-Помогает **в репозитории продукта** (fork) подтянуть изменения из каркаса
-[standard-fullstack-project](https://github.com/Aleksey-Danchin/standard-fullstack-project).
+Помогает **в продуктовом repo** подтянуть релиз каркаса. Нужен `git remote template` (добавляется при `/init-project`).
 
 **Важно:** ветки `sync/template-*` создаются только в **репозитории продукта**, не в каркасе.
 
@@ -20,9 +18,9 @@ disable-model-invocation: false
 
 Перед sync определи:
 
-1. Это **продукт** (fork) или **сам каркас**?
-   - Каркас → sync не нужен; работай с `main` и релизными тегами.
-2. Есть ли remote `template` (или `upstream`)?
+1. Это **продукт** (из template) или **repo каркаса**?
+   - Каркас → sync не нужен; релизы и теги `v*`.
+2. Есть ли remote `template`? (если нет — сначала `/init-project` или `git remote add template <url>`)
 3. Текущая версия в `.template-version` (если файл есть).
 4. Целевая версия: тег (`v0.2.0`) или `template/main`.
 
@@ -176,17 +174,11 @@ git checkout template/v0.2.0 -- \
 
 Проверь `UPGRADING.md` — могут требоваться сопутствующие изменения в `package.json`, `.env.template`, `infra/`.
 
-## Первая настройка fork (один раз)
+## Первая настройка (один раз)
 
-Skill **`prepare-scaffold-fork`** — интерактивный опрос и автоматическая подготовка.
+**GitHub:** Use this template → clone → **`/init-project`**.
 
-Или скрипт:
-
-```bash
-.cursor/skills/prepare-scaffold-fork/scripts/prepare-fork.sh --project-name my-app
-```
-
-GitHub Fork: `origin` уже указывает на fork; добавить только `template`.
+Скрипт добавляет `git remote template` и удаляет одноразовые skills. Без этого шага sync невозможен.
 
 ## Антипаттерны
 

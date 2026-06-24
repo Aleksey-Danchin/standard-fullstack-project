@@ -1,42 +1,21 @@
-# Prepare fork — справочник
+## Старт продукта (GitHub Template)
 
-## Что делает подготовка
+1. **Use this template** на GitHub → новый repo (`origin`).
+2. `git clone` → **`/init-project`**.
+3. Скрипт добавляет **`git remote template`** — связь с repo каркаса для обновлений.
 
-| Шаг | Действие |
-|-----|----------|
-| Cleanup | `rm -rf .dev`, `rm -rf .cursor/skills/align-scaffold-standard` |
-| Rename | `xxyyzz` → `{project}` (case-insensitive) в файлах проекта |
-| `.env` | `cp .env.template .env`, новый `SESSION_TOKEN_SECRET`, опционально `PRODUCTION_URL` |
-| Git | `git remote add template` (если выбрано) |
+GitHub template **не создаёт** эту связь; без `template` remote skill `sync-scaffold-template` не работает.
 
-## Где встречается имя проекта
+## Skills в продукте после `/init-project`
 
-После rename обновляются (через replace `xxyyzz` в `apps/`, `infra/`, `scripts/`, `.env.template`; `.cursor/skills/` не трогаем):
+| Удаляется (одноразово) | Остаётся |
+|------------------------|----------|
+| `align-scaffold-standard` | `sync-scaffold-template` |
+| `prepare-scaffold-fork` | |
+| `/init-project` | |
 
-- `infra/compose/dev.yml`, `test.yml` — compose project, сети
-- `infra/traefik/` — сети, пути сертификатов `*.localhost.pem`
-- `.env.template` / `.env` — `POSTGRES_DB`, `SESSION_COOKIE_DOMAIN`, `CLIENT_URL`
-- `scripts/dev-*.sh` — сообщения и defaults
+Скрипт `prepare-fork.sh` удаляет одноразовые артефакты в **шаге 5**.
 
-## Dev-домен
+## Не fork
 
-Формат: `{project-name}.localhost` (mkcert + Traefik).
-
-Должен совпадать с:
-
-- `SESSION_COOKIE_DOMAIN`
-- `CLIENT_URL` / `RECOMMENDED_CLIENT_URL`
-- сертификат в `mkcert -CAROOT/{POSTGRES_DB}/`
-
-## Skills на fork после подготовки
-
-| Оставить | Удалить |
-|----------|---------|
-| `prepare-scaffold-fork` | `align-scaffold-standard` |
-| `sync-scaffold-template` | — |
-
-`prepare-scaffold-fork` можно оставить для справки или удалить вручную — на усмотрение команды.
-
-## Повторный запуск
-
-Если `xxyyzz` уже заменён — скрипт rename пропустит совпадения. Повторная подготовка безопасна только на ранней стадии; иначе уточни у пользователя.
+Для нескольких проектов с одного каркаса используйте **Use this template** каждый раз, не GitHub Fork (один fork на аккаунт на upstream).

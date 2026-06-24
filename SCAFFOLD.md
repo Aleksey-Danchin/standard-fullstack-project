@@ -1,7 +1,7 @@
 # Каркас (scaffold) — зоны файлов
 
 Это **не framework** в смысле NestJS/React — это **каркас** (scaffold): стартовый шаблон
-репозитория, который форкают и наращивают своим кодом.
+репозитория. Новые продукты создаются через **GitHub Template**, не fork.
 
 Терминология:
 
@@ -9,11 +9,11 @@
 |---------|-----------------|--------|
 | каркас | **scaffold** | Общая инфраструктура и session/api, обновляемая из template |
 | шаблон | **template** | Репозиторий `standard-fullstack-project` как источник |
-| продукт | **product** | Ваш fork и бизнес-код |
+| продукт | **product** | Repo из **Use this template** + ваш код |
 
 Маркеры в исходниках:
 
-| Маркер | Уровень | На fork |
+| Маркер | Уровень | В продукте |
 |--------|---------|---------|
 | `@scaffold-core` | **A — ядро** | Не редактировать. Расширять в своих модулях. |
 | `@scaffold-config` | **B — конфиг** | Только имя проекта, домены, секреты, env. |
@@ -21,9 +21,9 @@
 
 Skills Cursor:
 
-- `prepare-scaffold-fork` — первичная настройка fork (интерактивно)
-- `sync-scaffold-template` — подтянуть template (на fork)
-- `align-scaffold-standard` — только в репозитории каркаса; на fork удаляется при prepare
+- `sync-scaffold-template` — подтянуть релиз каркаса (остаётся в продукте)
+- `/init-project` — один раз после **Use this template**, затем удаляется
+- `align-scaffold-standard` — только в репозитории каркаса
 
 ## A — Core (`@scaffold-core`)
 

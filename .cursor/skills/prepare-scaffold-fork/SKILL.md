@@ -1,20 +1,21 @@
 ---
 name: prepare-scaffold-fork
 description: >-
-  Interactive setup of a product fork from the fullstack scaffold: asks project
-  name, domains, production URL, runs cleanup (.dev, align-scaffold-standard),
-  renames xxyyzz, creates .env, adds template remote, optional first boot.
-  Use when user forked/cloned the template, prepares new project, first setup,
-  настройка каркаса под себя, or after git clone.
+  Interactive setup after GitHub Use this template: asks project name, adds
+  template git remote, cleanup, renames xxyyzz, creates .env, optional first boot.
+  Use after creating a repo from template, clone, first setup, настройка проекта,
+  or /init-project.
 disable-model-invocation: false
 ---
 
-# Prepare Scaffold Fork
+# Prepare product from template
 
-Интерактивная подготовка **продуктового fork** после клонирования каркаса.
+Интерактивная подготовка **продуктового repo**, созданного через **GitHub → Use this template**.
 Агент задаёт вопросы → выполняет изменения → предлагает первый запуск.
 
-**Не запускать** в репозитории `standard-fullstack-project` без fork (мейнтейнер каркаса).
+**Точка входа:** slash-команда `/init-project`.
+
+**Не запускать** в репозитории каркаса (мейнтейнер `standard-fullstack-project`).
 
 ## Принципы
 
@@ -22,13 +23,13 @@ disable-model-invocation: false
 2. **Один блок вопросов за раз** — не перегружать.
 3. **Показать план** — краткое резюме ответов перед выполнением.
 4. **Коммит** — только если пользователь явно попросил.
-5. После подготовки на fork остаётся skill `sync-scaffold-template`; `align-scaffold-standard` удаляется.
+5. После подготовки в продукте остаётся только `sync-scaffold-template`. Удаляются одноразовые артефакты (см. план).
 
 ## Workflow
 
 ```
 Prepare progress:
-- [ ] Step 0: Confirm fork context
+- [ ] Step 0: Confirm product-from-template context
 - [ ] Step 1: Interview (3 раунда вопросов)
 - [ ] Step 2: Confirm plan with user
 - [ ] Step 3: Run prepare-fork.sh
@@ -38,12 +39,20 @@ Prepare progress:
 
 ### Step 0: Контекст
 
+Ожидаемый путь пользователя:
+
+1. GitHub: **Use this template** → новый repository (`origin`).
+2. `git clone` этого repo на хост.
+3. `/init-project` в Cursor.
+
 Проверь:
 
-- Есть ли `.dev/` или `xxyyzz` в `infra/compose/dev.yml` — признак свежего шаблона.
-- Если `.dev` нет и `xxyyzz` уже заменён — спроси: «Проект уже настраивали? Перенастроить?»
+- Свежий продукт: есть `.dev/` или `xxyyzz` в `infra/compose/dev.yml`.
+- Уже настроен: нет `.dev`, имя заменено — спроси про перенастройку.
 
-Если это **репозиторий каркаса** (мейнтейнер) — остановись: skill не для этого случая.
+Если это **repo каркаса** (не продукт из template) — остановись.
+
+**Раунд 0 (если неясно):** «Repo создан через Use this template?» Если нет — объясни правильный старт (README) и предложи продолжить только если это всё равно копия каркаса.
 
 ### Step 1: Опрос (используй AskQuestion)
 
@@ -58,8 +67,9 @@ Prepare progress:
 
 | Вопрос | По умолчанию |
 |--------|--------------|
-| Production URL | Пропустить / `https://example.com` |
-| Добавить `template` remote для будущих обновлений? | Да |
+| Production URL | Пропустить |
+| URL repo каркаса на GitHub | По умолчанию `https://github.com/Aleksey-Danchin/standard-fullstack-project.git` (для org — спросить) |
+| Добавить `git remote template` на каркас? | **Да** (нужно для sync) |
 | Сгенерировать `SESSION_TOKEN_SECRET`? | Да (openssl) |
 
 **Раунд 3 — первый запуск**
@@ -80,10 +90,10 @@ Prepare progress:
 ## План подготовки
 
 - Имя: **my-app** → домен **my-app.localhost**
-- Удалить: `.dev/`, `.cursor/skills/align-scaffold-standard/`
+- Удалить: `.dev/`, `.cursor/skills/align-scaffold-standard/`, `.cursor/skills/prepare-scaffold-fork/`, `.cursor/commands/init-project.md`
 - Заменить: `xxyyzz` → `my-app` во всём проекте
 - Создать: `.env` с секретами
-- Remote template: да
+- Remote `template` → URL каркаса (связь для обновлений; GitHub template этого не делает сам)
 - Первый запуск: да/нет
 ```
 
@@ -107,7 +117,7 @@ Dry-run (показать что изменится):
   --production-url 'https://example.com'    # если указан
 ```
 
-Флаги: `--no-template-remote`, `--session-secret '<value>'` — по ответам пользователя.
+Флаги: `--no-template-remote`, `--template-url <git-url>`, `--session-secret '<value>'`.
 
 После скрипта проверь:
 
@@ -157,7 +167,7 @@ Smoke: открыть `https://<project>.localhost`, login `root` / `123`.
 - Не удалять `.git` без явного запроса
 - Не коммитить `.env`
 - Не править `apps/**/session/` под имя проекта — только replace placeholder
-- Не оставлять `align-scaffold-standard` на fork
+- Не оставлять одноразовые skills/commands в продукте — скрипт удаляет в конце
 
 ## См. также
 

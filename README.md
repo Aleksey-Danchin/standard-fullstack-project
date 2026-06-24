@@ -9,10 +9,10 @@
 | Термин | Значение |
 |--------|----------|
 | **Каркас / scaffold** | Стартовый monorepo: session, infra, dev-окружение |
-| **Template** | Этот репозиторий как источник обновлений |
-| **Fork / продукт** | Ваш проект на базе каркаса + свой код |
+| **Template repo** | Этот репозиторий на GitHub (источник для **Use this template**) |
+| **Продукт** | Новый repo, созданный из template + ваш код |
 
-Плейсхолдер имени в шаблоне: **`xxyyzz`** (compose, БД, домен `xxyyzz.localhost`).
+Плейсхолдер имени в каркасе: **`xxyyzz`** (compose, БД, домен `xxyyzz.localhost`).
 
 ## Стек
 
@@ -31,40 +31,46 @@ apps/frontend/     React (Vite)
 apps/prisma/       схема, миграции, seed
 infra/             compose, traefik, dockerfiles
 scripts/           dev-start, prisma-*
-.cursor/skills/    Cursor Agent skills для fork и sync
+.cursor/skills/    Cursor Agent skills (init, sync)
 ```
 
 Зоны каркаса и маркеры `@scaffold-*` — [SCAFFOLD.md](SCAFFOLD.md).
 
 ## Начало работы
 
-### Продуктовый fork
+### Новый продукт (рекомендуется: GitHub Template)
 
-1. Fork / clone репозитория.
-2. В Cursor: **«настрой проект под меня»** или skill **`prepare-scaffold-fork`** — интерактивная подготовка (имя, `.env`, cleanup, template remote, опционально первый запуск).
-3. Разработка своих фич вне зон каркаса ([SCAFFOLD.md](SCAFFOLD.md)).
-4. Обновления каркаса: skill **`sync-scaffold-template`** → ветка `sync/template-*` → PR в `main`.
+1. **GitHub:** на странице каркаса → **Use this template** → Create a new repository  
+   (можно несколько проектов с одного каркаса; fork на тот же аккаунт для этого не нужен).
+2. **Локально:** `git clone` вашего нового repo.
+3. **Cursor:** **`/init-project`** — интерактивная настройка (имя, `.env`, `git remote template`, первый запуск).
+4. Разработка своих фич вне зон каркаса ([SCAFFOLD.md](SCAFFOLD.md)).
+5. **Обновления каркаса:** skill `sync-scaffold-template` → ветка `sync/template-*` → PR в `main`.
+
+GitHub после template **не связывает** repo с каркасом автоматически — remote `template` добавляет `/init-project` (или вручную).
 
 ### Мейнтейнер каркаса
 
-Работа в `main`, релизы с тегами `v*`, skills `align-scaffold-standard` + `prepare-scaffold-fork` / `sync-scaffold-template` для документации.
+1. Settings → **Template repository** — включить.
+2. Релизы с тегами `v*`, `CHANGELOG.md`, `UPGRADING.md`.
+3. Skills: `align-scaffold-standard`, `prepare-scaffold-fork`, `sync-scaffold-template`.
 
 ## Документация
 
 | Файл | Описание |
 |------|----------|
 | [SCAFFOLD.md](SCAFFOLD.md) | Зоны A/B/C, маркеры, drift |
-| [UPGRADING.md](UPGRADING.md) | Шаги при обновлении версии template |
+| [UPGRADING.md](UPGRADING.md) | Шаги при обновлении версии каркаса |
 | [CHANGELOG.md](CHANGELOG.md) | История релизов каркаса |
-| `.template-version` | Текущая версия каркаса в repo |
+| `.template-version` | Версия каркаса |
 
-## Cursor skills
+## Cursor
 
-| Skill | Кому | Назначение |
-|-------|------|------------|
-| `prepare-scaffold-fork` | Fork | Интерактивная первичная настройка |
-| `sync-scaffold-template` | Fork | Подтянуть релиз template |
-| `align-scaffold-standard` | Только каркас | Маркеры, аудит (на fork удаляется) |
+| Команда / skill | Когда |
+|-----------------|-------|
+| `/init-project` | Один раз после **Use this template** + clone |
+| `sync-scaffold-template` | Подтянуть релиз каркаса (`v*`) |
+| `align-scaffold-standard` | Только в repo каркаса (на продукте удаляется) |
 
 ## Требования
 
@@ -73,5 +79,3 @@ Docker, Docker Compose v2, [mkcert](https://github.com/FiloSottile/mkcert), open
 ## Session API (кратко)
 
 Cookie-сессии (Redis), префикс `/api/session`: `login`, `logout`, `check`, `refresh`, `list`.
-
-Подробности — в коде `apps/backend/src/session/` и после подготовки fork на вашем dev-домене.
