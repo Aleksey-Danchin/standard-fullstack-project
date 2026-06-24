@@ -12,6 +12,7 @@
 - Scaffold zones: `SCAFFOLD.md`, `@scaffold-*` markers
 - Skills: `sync-scaffold-template`, `align-scaffold-standard`
 - Session module (backend + frontend), Redis, Traefik dev stack
+- Redis persistence in dev: named volume `redis-data` + AOF (`infra/redis/redis.conf`)
 
 ## [0.1.0] - 2026-06-24
 

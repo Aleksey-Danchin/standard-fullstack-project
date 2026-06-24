@@ -1,6 +1,6 @@
 # @scaffold-config — scaffold infra/scripts/env. Change project name, domains, and env only. See SCAFFOLD.md
 
-name: xxyyzz
+name: ${POSTGRES_DB:-xxyyzz}
 
 services:
   postgres:
@@ -28,6 +28,10 @@ services:
 
   redis:
     image: redis:7.4-alpine
+    command: redis-server /usr/local/etc/redis/redis.conf
+    volumes:
+      - redis-data:/data
+      - ../../infra/redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
     networks:
       - xxyyzz-net
     healthcheck:
@@ -190,6 +194,9 @@ services:
 
 volumes:
   postgres-data:
+    name: ${POSTGRES_DB:-xxyyzz}-postgres-data
+  redis-data:
+    name: ${POSTGRES_DB:-xxyyzz}-redis-data
 
 networks:
   xxyyzz-net:

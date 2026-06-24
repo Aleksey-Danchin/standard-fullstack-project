@@ -78,4 +78,4 @@ Docker, Docker Compose v2, [mkcert](https://github.com/FiloSottile/mkcert), open
 
 ## Session API (кратко)
 
-Cookie-сессии (Redis), префикс `/api/session`: `login`, `logout`, `check`, `refresh`, `list`.
+Cookie-сессии (Redis, AOF + volume в dev), префикс `/api/session`: `login`, `logout`, `check`, `refresh`, `list`.
