@@ -1,0 +1,2 @@
+# Shell scripts: LF and executable bit in git
+*.sh text eol=lf

@@ -12,6 +12,7 @@ PRODUCTION_URL=""
 ADD_TEMPLATE_REMOTE=true
 SESSION_SECRET=""
 TEMPLATE_URL=""
+SKIP_BOOTSTRAP=false
 
 usage() {
   cat <<'EOF'
@@ -23,6 +24,7 @@ Options:
   --session-secret <str>  SESSION_TOKEN_SECRET (иначе генерируется)
   --template-url <url>    URL git-репозитория каркаса (для remote template)
   --no-template-remote    Не добавлять git remote template
+  --no-bootstrap          Не ставить зависимости, migrate и seed
   --dry-run               Показать действия без изменений
   -h, --help
 EOF
@@ -35,6 +37,7 @@ while [[ $# -gt 0 ]]; do
     --session-secret) SESSION_SECRET="${2:?}"; shift 2 ;;
     --template-url) TEMPLATE_URL="${2:?}"; shift 2 ;;
     --no-template-remote) ADD_TEMPLATE_REMOTE=false; shift ;;
+    --no-bootstrap) SKIP_BOOTSTRAP=true; shift ;;
     --dry-run) DRY_RUN=true; shift ;;
     -h|--help) usage; exit 0 ;;
     *) echo "Unknown option: $1" >&2; usage; exit 1 ;;
@@ -154,7 +157,24 @@ if [[ "${ADD_TEMPLATE_REMOTE}" == true ]]; then
   fi
 fi
 
-# 5. One-time Cursor artifacts (this script removes itself)
+# 5. Executable bits on scripts (git template often drops +x)
+if [[ "${DRY_RUN}" == true ]]; then
+  echo "[dry-run] chmod +x scripts/*.sh scripts/lib/*.sh"
+else
+  chmod +x scripts/*.sh scripts/lib/*.sh 2>/dev/null || true
+  chmod +x "${SCRIPT_DIR}"/*.sh 2>/dev/null || true
+  echo "Set executable bit on scripts"
+fi
+
+# 6. Bootstrap: npm ci, первая миграция create_user_model, seed
+if [[ "${SKIP_BOOTSTRAP}" == false ]]; then
+  export DRY_RUN
+  "${SCRIPT_DIR}/bootstrap-dev.sh"
+else
+  echo "Skipped bootstrap (--no-bootstrap)."
+fi
+
+# 7. One-time Cursor artifacts (this script removes itself)
 run_rm_rf ".cursor/skills/prepare-scaffold-fork"
 if [[ "${DRY_RUN}" == true ]]; then
   echo "[dry-run] rm -f .cursor/commands/init-project.md"
@@ -165,9 +185,7 @@ fi
 
 echo ""
 echo "=== Done ==="
-echo "Next (manual or via skill):"
+echo "Next:"
 echo "  mkcert -install   # if not done yet"
 echo "  ./scripts/dev-start.sh"
-echo "  ./scripts/prisma-migrate.sh init   # if no migrations"
-echo "  ./scripts/prisma-seed.sh"
 echo "  https://${DEV_DOMAIN}"

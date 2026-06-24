@@ -6,6 +6,20 @@
 
 GitHub template **не создаёт** эту связь; без `template` remote skill `sync-scaffold-template` не работает.
 
+## Bootstrap (один раз в prepare-fork)
+
+`prepare-fork.sh` вызывает `bootstrap-dev.sh`:
+
+1. `npm ci` в backend, frontend, prisma (контейнеры)
+2. `prisma generate`
+3. `postgres` + `redis`
+4. `prisma migrate dev --name create_user_model` — первая миграция создаётся в продукте
+5. `prisma db seed` — пользователь `root` / `123`
+
+В template **нет** готовых migration SQL — только `schema` и `migration_lock.toml`.
+
+Пропустить: `prepare-fork.sh --no-bootstrap`.
+
 ## Skills в продукте после `/init-project`
 
 | Удаляется (одноразово) | Остаётся |
@@ -14,7 +28,9 @@ GitHub template **не создаёт** эту связь; без `template` rem
 | `prepare-scaffold-fork` | |
 | `/init-project` | |
 
-Скрипт `prepare-fork.sh` удаляет одноразовые артефакты в **шаге 5**.
+Скрипт `prepare-fork.sh`: `chmod +x scripts/*.sh`, bootstrap, затем удаляет одноразовые артефакты.
+
+После init: `./scripts/dev-start.sh` (без повторной установки зависимостей).
 
 ## Не fork
 

@@ -2,7 +2,8 @@
 name: prepare-scaffold-fork
 description: >-
   Interactive setup after GitHub Use this template: asks project name, adds
-  template git remote, cleanup, renames xxyyzz, creates .env, optional first boot.
+  template git remote, cleanup, renames xxyyzz, creates .env, bootstrap
+  (deps, migrate create_user_model, seed), optional dev-start.
   Use after creating a repo from template, clone, first setup, настройка проекта,
   or /init-project.
 disable-model-invocation: false
@@ -32,8 +33,8 @@ Prepare progress:
 - [ ] Step 0: Confirm product-from-template context
 - [ ] Step 1: Interview (3 раунда вопросов)
 - [ ] Step 2: Confirm plan with user
-- [ ] Step 3: Run prepare-fork.sh
-- [ ] Step 4: Optional mkcert / dev boot
+- [ ] Step 3: Run prepare-fork.sh (включает bootstrap)
+- [ ] Step 4: Optional mkcert / dev-start
 - [ ] Step 5: Summary + next steps (sync-scaffold-template)
 ```
 
@@ -94,7 +95,8 @@ Prepare progress:
 - Заменить: `xxyyzz` → `my-app` во всём проекте
 - Создать: `.env` с секретами
 - Remote `template` → URL каркаса (связь для обновлений; GitHub template этого не делает сам)
-- Первый запуск: да/нет
+- Bootstrap: `npm ci`, миграция `create_user_model`, seed
+- Первый `dev-start`: да/нет
 ```
 
 Дождись явного «да» / «go» перед Step 3 (если пользователь уже просил «сделай всё» — считай согласием).
@@ -117,7 +119,9 @@ Dry-run (показать что изменится):
   --production-url 'https://example.com'    # если указан
 ```
 
-Флаги: `--no-template-remote`, `--template-url <git-url>`, `--session-secret '<value>'`.
+Флаги: `--no-template-remote`, `--no-bootstrap`, `--template-url <git-url>`, `--session-secret '<value>'`.
+
+`prepare-fork.sh` автоматически вызывает `bootstrap-dev.sh` (зависимости, `prisma migrate dev --name create_user_model`, seed). Пропустить bootstrap: `--no-bootstrap`.
 
 После скрипта проверь:
 
@@ -125,15 +129,16 @@ Dry-run (показать что изменится):
 grep -r xxyyzz --exclude-dir=node_modules --exclude-dir=.git . | head -5 || echo "OK: no placeholder"
 test -f .env && echo "OK: .env exists"
 test ! -d .dev && echo "OK: .dev removed"
+ls apps/prisma/migrations/*/migration.sql 2>/dev/null | head -1
 ```
 
 ### Step 4: Первый запуск (если согласовано)
 
+Bootstrap уже выполнен в Step 3. Осталось поднять полный стек:
+
 ```bash
 mkcert -install   # если нужно
 ./scripts/dev-start.sh
-./scripts/prisma-migrate.sh init   # только если migrations/ пуста или пользователь просит
-./scripts/prisma-seed.sh
 ```
 
 Smoke: открыть `https://<project>.localhost`, login `root` / `123`.
@@ -150,6 +155,8 @@ Smoke: открыть `https://<project>.localhost`, login `root` / `123`.
 | Имя | my-app |
 | Dev | https://my-app.localhost |
 | Template remote | template → github.com/.../standard-fullstack-project |
+| Миграция | create_user_model |
+| Seed | выполнен |
 
 **Дальше:** разработка в `main` / feature-ветках.
 
@@ -160,7 +167,11 @@ Smoke: открыть `https://<project>.localhost`, login `root` / `123`.
 
 ## Utility scripts
 
-**scripts/prepare-fork.sh** — cleanup, rename, `.env`, template remote.
+| Скрипт | Назначение |
+|--------|------------|
+| `.cursor/skills/prepare-scaffold-fork/scripts/prepare-fork.sh` | cleanup, rename, `.env`, template remote, bootstrap |
+| `.cursor/skills/prepare-scaffold-fork/scripts/bootstrap-dev.sh` | postgres, `npm ci`, migrate, seed |
+| `.cursor/skills/prepare-scaffold-fork/scripts/ensure-dev-deps.sh` | `npm ci` + `prisma generate` (вызывается из bootstrap) |
 
 ## Антипаттерны
 
@@ -168,6 +179,7 @@ Smoke: открыть `https://<project>.localhost`, login `root` / `123`.
 - Не коммитить `.env`
 - Не править `apps/**/session/` под имя проекта — только replace placeholder
 - Не оставлять одноразовые skills/commands в продукте — скрипт удаляет в конце
+- Не дублировать bootstrap вручную через `prisma-migrate.sh init` после prepare
 
 ## См. также
 
