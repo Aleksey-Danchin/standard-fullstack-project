@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+**/.env
+!.env.template
+
+**/node_modules
+**/dist
+**/.vite
+**/coverage
+
+**/*.log
+.DS_Store

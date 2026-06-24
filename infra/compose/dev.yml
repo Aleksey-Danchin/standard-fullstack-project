@@ -1,0 +1,151 @@
+name: xxyyzz
+
+services:
+  postgres:
+    image: postgres:18.3
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-xxyyzz}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    volumes:
+      - postgres-data:/var/lib/postgresql
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    networks:
+      - xxyyzz-net
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-xxyyzz}",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.backend.dev
+    volumes:
+      - ../../apps:/apps
+    working_dir: /apps/backend
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-xxyyzz}
+      - PORT=3000
+      - SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN:-xxyyzz.localhost}
+      - REUSE_DETECTION_MODE=${REUSE_DETECTION_MODE:-quarantine}
+      - RECOMMENDED_CLIENT_URL=${RECOMMENDED_CLIENT_URL:-https://xxyyzz.localhost}
+    ports:
+      - "${BACKEND_PORT:-3000}:3000"
+    networks:
+      - xxyyzz-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.backend.rule=Host(`xxyyzz.localhost`) && PathPrefix(`/api`)
+      - traefik.http.routers.backend.entrypoints=websecure
+      - traefik.http.routers.backend.tls=true
+      - traefik.http.routers.backend.priority=100
+      - traefik.http.routers.backend-lan-api.rule=PathPrefix(`/api`)
+      - traefik.http.routers.backend-lan-api.entrypoints=api1
+      - traefik.http.routers.backend-lan-api.tls=true
+      - traefik.http.routers.backend-lan-api.priority=100
+      - traefik.http.routers.backend-lan-api-http.rule=PathPrefix(`/api`)
+      - traefik.http.routers.backend-lan-api-http.entrypoints=api1
+      - traefik.http.routers.backend-lan-api-http.priority=90
+      - traefik.http.services.backend.loadbalancer.server.port=3000
+
+  frontend:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.frontend.dev
+    command: npm run dev -- --host
+    volumes:
+      - ../../apps:/apps
+    working_dir: /apps/frontend
+    networks:
+      - xxyyzz-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5173 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend.rule=Host(`xxyyzz.localhost`)
+      - traefik.http.routers.frontend.entrypoints=websecure
+      - traefik.http.routers.frontend.tls=true
+      - traefik.http.routers.frontend.priority=1
+      - traefik.http.services.frontend.loadbalancer.server.port=5173
+
+  studio:
+    build:
+      context: ../..
+      dockerfile: infra/docker/Dockerfile.studio.dev
+    command: sh -c "npx prisma migrate deploy && npx prisma studio --browser none --port 5555"
+    volumes:
+      - ../../apps:/apps
+    working_dir: /apps/prisma
+    environment:
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-xxyyzz}
+    networks:
+      - xxyyzz-net
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5555 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.studio.rule=Host(`xxyyzz.localhost`)
+      - traefik.http.routers.studio.entrypoints=studio
+      - traefik.http.routers.studio.tls=true
+      - traefik.http.services.studio.loadbalancer.server.port=5555
+
+  traefik:
+    image: traefik:v3
+    ports:
+      - "80:80"
+      - "443:443"
+      - "3001:3001"
+      - "5555:5555"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../../infra/traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ../../infra/traefik/dynamic:/etc/traefik/dynamic:ro
+      - ${MKCERT_CAROOT:-${HOME}/.local/share/mkcert}/xxyyzz:/certs:ro
+    networks:
+      - xxyyzz-net
+    depends_on:
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_healthy
+    healthcheck:
+      test:
+        ["CMD-SHELL", "wget --spider -q http://localhost:8082/ping || exit 1"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+
+volumes:
+  postgres-data:
+
+networks:
+  xxyyzz-net:
