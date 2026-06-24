@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './../routes/~__root'
 import { Route as IndexRouteImport } from './../routes/~index'
 import { Route as UsersIndexRouteImport } from './../routes/~users/~index'
+import { Route as _tests_SessionIndexRouteImport } from './../routes/~__tests__/~session/~index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +23,40 @@ const UsersIndexRoute = UsersIndexRouteImport.update({
   path: '/users/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const _tests_SessionIndexRoute = _tests_SessionIndexRouteImport.update({
+  id: '/__tests__/session/',
+  path: '/session/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/users/': typeof UsersIndexRoute
+  '/session/': typeof _tests_SessionIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/users': typeof UsersIndexRoute
+  '/session': typeof _tests_SessionIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/users/': typeof UsersIndexRoute
+  '/__tests__/session/': typeof _tests_SessionIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/users/'
+  fullPaths: '/' | '/users/' | '/session/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/users'
-  id: '__root__' | '/' | '/users/'
+  to: '/' | '/users' | '/session'
+  id: '__root__' | '/' | '/users/' | '/__tests__/session/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   UsersIndexRoute: typeof UsersIndexRoute
+  _tests_SessionIndexRoute: typeof _tests_SessionIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +75,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof UsersIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/__tests__/session/': {
+      id: '/__tests__/session/'
+      path: '/session'
+      fullPath: '/session/'
+      preLoaderRoute: typeof _tests_SessionIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   UsersIndexRoute: UsersIndexRoute,
+  _tests_SessionIndexRoute: _tests_SessionIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

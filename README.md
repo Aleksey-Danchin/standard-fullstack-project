@@ -58,6 +58,34 @@
 
 - [ ] **Первый запуск** — `./scripts/dev-start.sh`, затем миграции и seed (см. [Быстрый старт](#быстрый-старт)).
 
+- [ ] **Remote каркаса** (если планируете подтягивать обновления шаблона) — не удаляйте `.git`; добавьте remote `template` (см. [Обновление каркаса в fork](#обновление-каркаса-в-fork)).
+
+## Обновление каркаса в fork
+
+Рекомендуемый путь: **GitHub Fork** или clone с сохранением истории. Свой код — в `origin`, каркас — в remote `template`.
+
+```bash
+git remote add template https://github.com/Aleksey-Danchin/standard-fullstack-project.git
+git fetch template --tags
+.cursor/skills/sync-scaffold-template/scripts/template-sync.sh --dry-run
+.cursor/skills/sync-scaffold-template/scripts/template-sync.sh --ref v0.2.0
+```
+
+Ветки `sync/template-*` создаются **только в вашем репозитории** — для безопасного merge перед PR в `main`.
+
+| Ресурс | Назначение |
+|--------|------------|
+| [SCAFFOLD.md](SCAFFOLD.md) | Зоны каркаса (A/B/C) и маркеры `@scaffold-*` в файлах |
+| [UPGRADING.md](UPGRADING.md) | Ручные шаги при переходе между версиями |
+| [CHANGELOG.md](CHANGELOG.md) | Что изменилось в каркасе |
+| `.template-version` | Установленная версия каркаса |
+| `.cursor/skills/sync-scaffold-template/` | Подтянуть обновления template (`scripts/template-sync.sh`) |
+| `.cursor/skills/align-scaffold-standard/` | Стандарт каркаса: маркеры, SCAFFOLD.md (`scripts/scaffold-audit.sh`) |
+
+В Cursor: *«подтяни обновления каркаса»* → `sync-scaffold-template`; *«приведи к стандарту каркаса»* → `align-scaffold-standard`.
+
+Удаление `.git` и старт с нуля — только если обновления каркаса не нужны.
+
 ## Имя проекта (плейсхолдер `xxyyzz`)
 
 В шаблоне везде используется заглушка **`xxyyzz`**: имя compose-проекта, Docker-сеть, имя БД, локальный домен `xxyyzz.localhost` и папка сертификатов mkcert.
@@ -106,6 +134,22 @@ mkcert -install
    | Frontend      | https://xxyyzz.localhost      |
    | Backend API   | https://xxyyzz.localhost/api  |
    | Prisma Studio | https://xxyyzz.localhost:5555 |
+   | Redis UI      | https://xxyyzz.localhost:8081   |
+
+### Session API
+
+Cookie-based сессии (Redis). Эндпоинты под префиксом `/api/session`:
+
+| Метод | Путь | Описание |
+|-------|------|----------|
+| `POST` | `/login` | Вход (`login`, `password`) |
+| `POST` | `/logout` | Выход, отзыв сессии |
+| `GET` | `/check` | Проверка; ротация access при истечении |
+| `POST` | `/refresh` | Принудительная ротация токенов |
+| `GET` | `/list` | Список сессий пользователя (требует `AuthGuard`) |
+| `DELETE` | `/:sessionId` | Отзыв сессии (требует `AuthGuard`) |
+
+Переменные сессии в `.env.template`: `REDIS_URL`, `SESSION_ACCESS_TTL`, `SESSION_REFRESH_TTL`, `SESSION_TOKEN_SECRET`, `SESSION_MAX_PER_USER`, `SESSION_EVICTION_POLICY`, `REUSE_DETECTION_MODE`.
 
 Остановка окружения:
 

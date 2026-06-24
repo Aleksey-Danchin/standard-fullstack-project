@@ -1,3 +1,5 @@
+# @scaffold-config — scaffold infra/scripts/env. Change project name, domains, and env only. See SCAFFOLD.md
+
 entryPoints:
   web:
     address: ":80"

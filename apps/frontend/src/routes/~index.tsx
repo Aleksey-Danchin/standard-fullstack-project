@@ -12,6 +12,13 @@ function RouteComponent() {
         README.md file or visit the site:
       </p>
       <a
+        href="/session-test"
+        className="text-blue-500 hover:text-blue-700"
+      >
+        Session E2E test page
+      </a>
+      {" · "}
+      <a
         href="https://github.com/Aleksey-Danchin/standard-fullstack-project"
         className="text-blue-500 hover:text-blue-700"
       >

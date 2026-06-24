@@ -1,3 +1,5 @@
+# @scaffold-config — scaffold infra/scripts/env. Change project name, domains, and env only. See SCAFFOLD.md
+
 name: xxyyzz
 
 services:
@@ -24,6 +26,39 @@ services:
       retries: 10
     restart: unless-stopped
 
+  redis:
+    image: redis:7.4-alpine
+    networks:
+      - xxyyzz-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    networks:
+      - xxyyzz-net
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8081 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.redis-ui.rule=Host(`xxyyzz.localhost`)
+      - traefik.http.routers.redis-ui.entrypoints=redis-ui
+      - traefik.http.routers.redis-ui.tls=true
+      - traefik.http.services.redis-ui.loadbalancer.server.port=8081
+
   backend:
     build:
       context: ../..
@@ -34,8 +69,14 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres:5432/${POSTGRES_DB:-xxyyzz}
       - PORT=3000
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
       - SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN:-xxyyzz.localhost}
-      - REUSE_DETECTION_MODE=${REUSE_DETECTION_MODE:-quarantine}
+      - SESSION_ACCESS_TTL=${SESSION_ACCESS_TTL:-10m}
+      - SESSION_REFRESH_TTL=${SESSION_REFRESH_TTL:-7d}
+      - SESSION_TOKEN_SECRET=${SESSION_TOKEN_SECRET:-change-me-in-production}
+      - SESSION_MAX_PER_USER=${SESSION_MAX_PER_USER:-0}
+      - SESSION_EVICTION_POLICY=${SESSION_EVICTION_POLICY:-oldest}
+      - REUSE_DETECTION_MODE=${REUSE_DETECTION_MODE:-reject}
       - RECOMMENDED_CLIENT_URL=${RECOMMENDED_CLIENT_URL:-https://xxyyzz.localhost}
     ports:
       - "${BACKEND_PORT:-3000}:3000"
@@ -43,6 +84,8 @@ services:
       - xxyyzz-net
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/api || exit 1"]
@@ -124,6 +167,7 @@ services:
       - "443:443"
       - "3001:3001"
       - "5555:5555"
+      - "8081:8081"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ../../infra/traefik/traefik.yml:/etc/traefik/traefik.yml:ro

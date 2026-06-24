@@ -1,3 +1,5 @@
+# @scaffold-config — scaffold infra/scripts/env. Change project name, domains, and env only. See SCAFFOLD.md
+
 entryPoints:
   web:
     address: ":80"
@@ -12,6 +14,8 @@ entryPoints:
     address: ":3001"
   studio:
     address: ":5555"
+  redis-ui:
+    address: ":8081"
   ping:
     address: ":8082"
 

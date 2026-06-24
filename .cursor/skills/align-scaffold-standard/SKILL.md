@@ -1,0 +1,163 @@
+---
+name: align-scaffold-standard
+description: >-
+  Aligns a repo with fullstack scaffold (каркас) standards: audits scaffold
+  zones, adds or fixes @scaffold-core/config/integration markers, updates
+  SCAFFOLD.md, moves misplaced product code out of scaffold paths. Use when
+  marking scaffold files, fixing scaffold compliance, preparing a fork for
+  template sync, or after adding new scaffold modules to the template repo.
+disable-model-invocation: false
+---
+
+# Align Scaffold Standard
+
+Приводит репозиторий к стандарту **каркаса** (scaffold): маркеры в файлах,
+актуальный `SCAFFOLD.md`, отделение продуктового кода от зон template.
+
+**Не путать с framework** (NestJS, React) — здесь «каркас» = стартовый шаблон monorepo.
+
+## Когда применять
+
+| Ситуация | Действие |
+|----------|----------|
+| Новый файл в зоне A/B/C (мейнтейнер template) | Баннер + строка в `SCAFFOLD.md` |
+| Fork: правили `session/` или `services/` | Вынести в product, восстановить из template или пометить осознанно |
+| Перед первым `template-sync` | Аудит + маркеры |
+| Пользователь просит «пометить каркасные файлы» | Полный проход |
+
+## Workflow
+
+```
+Align progress:
+- [ ] Step 1: Run `scripts/scaffold-audit.sh`
+- [ ] Step 2: Classify repo (template vs product fork)
+- [ ] Step 3: Fix missing markers
+- [ ] Step 4: Fix misplaced product code in scaffold zones
+- [ ] Step 5: Update SCAFFOLD.md
+- [ ] Step 6: Re-run audit and summarize
+```
+
+### Step 1: Audit
+
+```bash
+.cursor/skills/align-scaffold-standard/scripts/scaffold-audit.sh
+```
+
+Запомни: `MISSING`, `UNEXPECTED`, drift vs `template/main`.
+
+### Step 2: Classify
+
+- **Репозиторий template** (standard-fullstack-project): все пути из `SCAFFOLD.md` должны быть помечены.
+- **Fork продукта**: маркеры как у template; drift в core — либо откат к template, либо вынос в `features/` / `modules/`.
+
+### Step 3: Add or fix markers
+
+Используй **стабильный** текст из [SCAFFOLD.md](../../../SCAFFOLD.md) (раздел «Шаблоны баннеров»).
+
+| Тип файла | Куда вставить |
+|-----------|----------------|
+| `.ts`, `.tsx` (A) | Первая строка файла, block comment |
+| `.sh` | Сразу после shebang |
+| `.yml`, `Dockerfile`, `.env.template` | Первая строка `# ...` |
+| Integration (C) | `app.module.ts`, `main.ts`, `main.tsx` |
+
+Не менять текст баннера без причины — это снижает merge-конфликты.
+
+Проверка:
+
+```bash
+grep -rl '@scaffold-core' apps/backend/src/session apps/frontend/src/services
+```
+
+### Step 4: Misplaced code
+
+Если в `apps/frontend/src/services/session/` лежит бизнес-логика:
+
+1. Создать `apps/frontend/src/features/<name>/`
+2. Перенести код, обновить imports
+3. В scaffold оставить только вызов/hook из feature
+
+Если fork сильно изменил core-файл:
+
+```bash
+git fetch template
+git diff template/main -- apps/frontend/src/services/session/sessionStore.ts
+```
+
+Предложить: `git checkout template/main -- <path>` + перенос кастомизаций в product.
+
+### Step 5: Update SCAFFOLD.md
+
+Добавить новые пути в секции A/B/C. Удалить устаревшие. Не дублировать README.
+
+Если добавлен новый каталог core:
+
+```markdown
+## A — Core
+...
+apps/backend/src/new-scaffold-module/
+```
+
+### Step 6: Verify
+
+```bash
+.cursor/skills/align-scaffold-standard/scripts/scaffold-audit.sh
+```
+
+Отчёт пользователю:
+
+```markdown
+## Scaffold align summary
+
+- **Missing markers fixed:** N files
+- **Product code moved:** [paths or «нет»]
+- **SCAFFOLD.md:** updated
+- **Drift vs template:** [список или «не проверялось»]
+- **Next:** template-sync / commit / PR
+```
+
+## Баннеры — копипаста
+
+**A — core (TS/TSX):**
+
+```ts
+/**
+ * @scaffold-core — fullstack scaffold (каркас).
+ * Avoid edits: changes complicate merge when syncing template updates.
+ * Extend in your own modules. See SCAFFOLD.md
+ */
+```
+
+**B — config:**
+
+```bash
+# @scaffold-config — scaffold infra/scripts/env. Change project name, domains, and env only. See SCAFFOLD.md
+```
+
+**C — integration:**
+
+```ts
+/**
+ * @scaffold-integration — scaffold wiring point.
+ * Add your imports/providers; avoid rewriting scaffold core unless needed. See SCAFFOLD.md
+ */
+```
+
+## Utility scripts
+
+**scripts/scaffold-audit.sh** — проверка `@scaffold-*` маркеров и drift core-путей.
+
+```bash
+.cursor/skills/align-scaffold-standard/scripts/scaffold-audit.sh
+```
+
+## Связанные ресурсы
+
+- Карта зон: [SCAFFOLD.md](../../../SCAFFOLD.md)
+- Подтягивание template: skill `sync-scaffold-template`
+
+## Антипаттерны
+
+- Не помечать `package.json` и generated-файлы
+- Не использовать термин `framework` в новых баннерах — только **scaffold** / каркас
+- Не менять wording баннеров в каждом файле по-разному

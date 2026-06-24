@@ -12,7 +12,6 @@ export class UsersService {
       select: {
         id: true,
         login: true,
-        role: true,
         createdAt: true,
         updatedAt: true,
       },

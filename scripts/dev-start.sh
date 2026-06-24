@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @scaffold-config — scaffold infra/scripts/env. Change project name, domains, and env only. See SCAFFOLD.md
+
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
@@ -53,4 +55,4 @@ ensure_cert "${SESSION_COOKIE_DOMAIN:-xxyyzz.localhost}"
 
 export MKCERT_CAROOT
 
-compose_dev_cmd up -d --build postgres backend frontend studio traefik
+compose_dev_cmd up -d --build postgres redis redis-commander backend frontend studio traefik

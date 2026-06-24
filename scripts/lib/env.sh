@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# @scaffold-config — scaffold infra/scripts/env. Change project name, domains, and env only. See SCAFFOLD.md
+
 
 # Выбирает .env или .env.template, подгружает переменные и настраивает docker compose.
 # Требует: PROJECT_ROOT

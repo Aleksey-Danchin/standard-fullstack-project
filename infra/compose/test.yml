@@ -1,3 +1,5 @@
+# @scaffold-config — scaffold infra/scripts/env. Change project name, domains, and env only. See SCAFFOLD.md
+
 name: xxyyzz-test
 
 services:
@@ -23,6 +25,18 @@ services:
       retries: 10
     restart: unless-stopped
 
+  redis-test:
+    container_name: xxyyzz-redis-test
+    image: redis:7.4-alpine
+    networks:
+      - xxyyzz-test-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
   backend-test:
     container_name: xxyyzz-backend-test
     build:
@@ -34,11 +48,20 @@ services:
     environment:
       - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@postgres-test:5432/${POSTGRES_DB:-xxyyzz}
       - PORT=3000
+      - REDIS_URL=redis://redis-test:6379
       - SESSION_COOKIE_DOMAIN=${SESSION_COOKIE_DOMAIN:-xxyyzz.localhost}
+      - SESSION_ACCESS_TTL=${SESSION_ACCESS_TTL:-10m}
+      - SESSION_REFRESH_TTL=${SESSION_REFRESH_TTL:-7d}
+      - SESSION_TOKEN_SECRET=${SESSION_TOKEN_SECRET:-change-me-in-production}
+      - SESSION_MAX_PER_USER=${SESSION_MAX_PER_USER:-0}
+      - SESSION_EVICTION_POLICY=${SESSION_EVICTION_POLICY:-oldest}
+      - REUSE_DETECTION_MODE=${REUSE_DETECTION_MODE:-reject}
     networks:
       - xxyyzz-test-net
     depends_on:
       postgres-test:
+        condition: service_healthy
+      redis-test:
         condition: service_healthy
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:3000/api || exit 1"]
